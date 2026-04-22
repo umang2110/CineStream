@@ -1,0 +1,40 @@
+[
+  {
+    "email": "umanggonawala5@gmail.com",
+    "name": "umanggonawala5",
+    "password_hash": "$2b$10$K/YTp3fIhlGuaiKo/23YHuaZ7q6EFO/1zYXuEaTCDZQuE8XtDomQK",
+    "is_verified": true
+  },
+  {
+    "email": "ugonawala66@gmail.com",
+    "name": "ugonawala66",
+    "password_hash": "$2b$10$wl1mBVsFhmAflIOw3Jua9OK3QWjTEHyYcHrp6HGxAVE3LJ2KPIyBm",
+    "is_verified": true
+  },
+  {
+    "email": "ugonawala21@gmail.com",
+    "name": "ugonawala21",
+    "password_hash": "$2b$10$G3cFywlQIMkEAXkfvQtuJO6j3nAZkYCnQTqei9ktxTywCnEE6DKCC",
+    "is_verified": true
+  },
+  {
+    "email": "krutikaghantiwala10@gmail.com",
+    "name": "krutikaghantiwala10",
+    "password_hash": "$2b$10$fD.OzNuhZmy52ixd3vq9febR1tO1o3xZRWbHYtDX0IWF5RRSLkRS6",
+    "is_verified": false,
+    "verification_token": "379160",
+    "token_expiry": 1776596222894
+  },
+  {
+    "email": "tanishmjain06@gmail.com",
+    "name": "tanishmjain06",
+    "password_hash": "$2b$10$Domb9TRaY0T5VTjkn7dKweWL.ZMvgNUVZRoFSLunblo7W5akUNTeK",
+    "is_verified": true
+  },
+  {
+    "email": "jruchika40@gmail.com",
+    "name": "jruchika40",
+    "password_hash": "$2b$10$t/mi4j1JAal8ij.ftwLdeeLt./SaH64OHQwMHSwYcI1Ff8ux4j09a",
+    "is_verified": true
+  }
+]
