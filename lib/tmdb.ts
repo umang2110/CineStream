@@ -53,6 +53,16 @@ async function tmdbFetch(endpoint: string): Promise<any> {
     return cached.data
   }
 
+  // In the browser, always call our server route to avoid CORS/proxy issues in production.
+  if (typeof window !== "undefined") {
+    const apiUrl = `/api/tmdb${endpoint}`
+    const res = await fetch(apiUrl)
+    if (!res.ok) throw new Error(`TMDB proxy failed: ${endpoint}`)
+    const data = await res.json()
+    apiCache.set(cacheKey, { data, ts: Date.now() })
+    return data
+  }
+
   const separator = endpoint.includes("?") ? "&" : "?"
   const url = `${DIRECT_BASE}${endpoint}${separator}api_key=${API_KEY}`
 
