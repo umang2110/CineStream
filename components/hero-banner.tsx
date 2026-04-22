@@ -35,7 +35,7 @@ export function HeroBanner({ movie, onPlay, onInfo }: HeroBannerProps) {
 
   return (
     <>
-      <div className="relative h-[70vh] w-full overflow-hidden">
+      <div className="relative h-[58vh] sm:h-[65vh] md:h-[70vh] w-full overflow-hidden">
         <Image
           src={movie.backdrop || "/placeholder.svg?height=720&width=1280"}
           alt={movie.title}
@@ -45,9 +45,9 @@ export function HeroBanner({ movie, onPlay, onInfo }: HeroBannerProps) {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-transparent to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
+        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 md:p-12">
           <div className="container mx-auto max-w-2xl">
-            <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-4 text-balance drop-shadow-lg">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-foreground mb-3 sm:mb-4 text-balance drop-shadow-lg">
               {movie.title}
             </h1>
             <div className="flex items-center gap-4 mb-3">
@@ -67,7 +67,7 @@ export function HeroBanner({ movie, onPlay, onInfo }: HeroBannerProps) {
                 </span>
               ))}
             </div>
-            <p className="text-lg text-muted-foreground mb-6 text-pretty line-clamp-3">
+            <p className="text-base sm:text-lg text-muted-foreground mb-4 sm:mb-6 text-pretty line-clamp-3">
               {movie.description}
             </p>
             <div className="flex flex-wrap gap-3">

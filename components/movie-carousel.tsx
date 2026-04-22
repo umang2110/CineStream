@@ -60,10 +60,8 @@ export function MovieCarousel({ categoryId, title, movies, isTop10, onMovieClick
               {isTop10 ? (
                 <div className="flex items-end">
                   <span 
-                    className="font-black text-background drop-shadow-xl z-0 -mr-6 md:-mr-8 select-none"
+                    className="font-black text-background drop-shadow-xl z-0 -mr-4 sm:-mr-6 md:-mr-8 select-none leading-[0.8] text-[72px] sm:text-[96px] md:text-[120px]"
                     style={{ 
-                      fontSize: '120px', 
-                      lineHeight: '0.8', 
                       WebkitTextStroke: '2px hsl(var(--foreground))'
                     }}
                   >
