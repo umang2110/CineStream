@@ -1,3 +1,5 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 export interface UserDB {
   email: string;
   name: string;
@@ -7,19 +9,21 @@ export interface UserDB {
   token_expiry?: number;
 }
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_SECRET_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
 
-let supabasePromise: Promise<typeof import("@supabase/supabase-js").SupabaseClient> | null = null;
+let supabasePromise: Promise<SupabaseClient> | null = null;
 
 async function getSupabaseClient() {
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-    throw new Error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variables");
+  if (!SUPABASE_URL || !SUPABASE_SECRET_KEY) {
+    throw new Error(
+      "Missing Supabase environment variables. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_SECRET_KEY).",
+    );
   }
 
   if (!supabasePromise) {
     supabasePromise = import("@supabase/supabase-js").then(({ createClient }) =>
-      createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+      createClient(SUPABASE_URL, SUPABASE_SECRET_KEY, {
         auth: { persistSession: false, autoRefreshToken: false },
       }),
     );
