@@ -9,8 +9,30 @@ export interface UserDB {
   token_expiry?: number;
 }
 
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_SECRET_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
+function cleanEnvValue(value?: string): string {
+  return (value ?? "").trim().replace(/^['"]|['"]$/g, "");
+}
+
+function normalizeSupabaseUrl(rawValue: string): string {
+  const value = cleanEnvValue(rawValue);
+  if (!value) return "";
+
+  if (value.startsWith("http://") || value.startsWith("https://")) {
+    return value;
+  }
+
+  // Allow users to provide only project ref, e.g. "abcd1234"
+  if (/^[a-z0-9-]+$/i.test(value)) {
+    return `https://${value}.supabase.co`;
+  }
+
+  return value;
+}
+
+const SUPABASE_URL = normalizeSupabaseUrl(process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "");
+const SUPABASE_SECRET_KEY = cleanEnvValue(
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || "",
+);
 
 let supabasePromise: Promise<SupabaseClient> | null = null;
 
@@ -22,8 +44,15 @@ async function getSupabaseClient() {
   }
 
   if (!supabasePromise) {
+    let parsedUrl: URL;
+    try {
+      parsedUrl = new URL(SUPABASE_URL);
+    } catch {
+      throw new Error("Invalid SUPABASE_URL. Use full URL like https://<project-ref>.supabase.co");
+    }
+
     supabasePromise = import("@supabase/supabase-js").then(({ createClient }) =>
-      createClient(SUPABASE_URL, SUPABASE_SECRET_KEY, {
+      createClient(parsedUrl.toString(), SUPABASE_SECRET_KEY, {
         auth: { persistSession: false, autoRefreshToken: false },
       }),
     );
