@@ -9,7 +9,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Email and token are required' }, { status: 400 });
     }
 
-    const user = findUserByEmail(email);
+    const user = await findUserByEmail(email);
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     }
 
     // Mark as verified
-    updateUser(email, { 
+    await updateUser(email, { 
       is_verified: true, 
       verification_token: undefined, 
       token_expiry: undefined 

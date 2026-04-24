@@ -1,6 +1,3 @@
-import fs from 'fs';
-import path from 'path';
-
 export interface UserDB {
   email: string;
   name: string;
@@ -10,45 +7,94 @@ export interface UserDB {
   token_expiry?: number;
 }
 
-const dbPath = path.join(process.cwd(), 'data', 'users.json');
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// Ensure data directory exists
-if (!fs.existsSync(path.join(process.cwd(), 'data'))) {
-  fs.mkdirSync(path.join(process.cwd(), 'data'), { recursive: true });
-}
-if (!fs.existsSync(dbPath)) {
-  fs.writeFileSync(dbPath, JSON.stringify([]));
+let supabasePromise: Promise<typeof import("@supabase/supabase-js").SupabaseClient> | null = null;
+
+async function getSupabaseClient() {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY environment variables");
+  }
+
+  if (!supabasePromise) {
+    supabasePromise = import("@supabase/supabase-js").then(({ createClient }) =>
+      createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      }),
+    );
+  }
+
+  return supabasePromise;
 }
 
-export function getAllUsers(): UserDB[] {
-  try {
-    const data = fs.readFileSync(dbPath, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    return [];
+type UserUpdate = Partial<Omit<UserDB, "email">>;
+
+export async function getAllUsers(): Promise<UserDB[]> {
+  const supabase = await getSupabaseClient();
+  const { data, error } = await supabase
+    .from("users")
+    .select("email,name,password_hash,is_verified,verification_token,token_expiry")
+    .order("email", { ascending: true });
+
+  if (error) {
+    throw new Error(`Failed to fetch users: ${error.message}`);
+  }
+
+  return data ?? [];
+}
+
+export async function findUserByEmail(email: string): Promise<UserDB | null> {
+  const supabase = await getSupabaseClient();
+  const normalizedEmail = email.toLowerCase();
+
+  const { data, error } = await supabase
+    .from("users")
+    .select("email,name,password_hash,is_verified,verification_token,token_expiry")
+    .eq("email", normalizedEmail)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to find user: ${error.message}`);
+  }
+
+  return data;
+}
+
+export async function createUser(user: UserDB): Promise<void> {
+  const supabase = await getSupabaseClient();
+
+  const { error } = await supabase.from("users").insert({
+    email: user.email.toLowerCase(),
+    name: user.name,
+    password_hash: user.password_hash,
+    is_verified: user.is_verified,
+    verification_token: user.verification_token ?? null,
+    token_expiry: user.token_expiry ?? null,
+  });
+
+  if (error) {
+    throw new Error(`Failed to create user: ${error.message}`);
   }
 }
 
-export function saveUsers(users: UserDB[]) {
-  fs.writeFileSync(dbPath, JSON.stringify(users, null, 2));
-}
+export async function updateUser(email: string, updates: UserUpdate): Promise<void> {
+  const supabase = await getSupabaseClient();
+  const normalizedEmail = email.toLowerCase();
 
-export function findUserByEmail(email: string): UserDB | undefined {
-  const users = getAllUsers();
-  return users.find(u => u.email.toLowerCase() === email.toLowerCase());
-}
+  const payload: Record<string, string | number | boolean | null> = {};
 
-export function createUser(user: UserDB): void {
-  const users = getAllUsers();
-  users.push(user);
-  saveUsers(users);
-}
+  if (updates.name !== undefined) payload.name = updates.name;
+  if (updates.password_hash !== undefined) payload.password_hash = updates.password_hash;
+  if (updates.is_verified !== undefined) payload.is_verified = updates.is_verified;
+  if (updates.verification_token !== undefined) payload.verification_token = updates.verification_token ?? null;
+  if (updates.token_expiry !== undefined) payload.token_expiry = updates.token_expiry ?? null;
 
-export function updateUser(email: string, updates: Partial<UserDB>): void {
-  const users = getAllUsers();
-  const index = users.findIndex(u => u.email.toLowerCase() === email.toLowerCase());
-  if (index !== -1) {
-    users[index] = { ...users[index], ...updates };
-    saveUsers(users);
+  if (Object.keys(payload).length === 0) return;
+
+  const { error } = await supabase.from("users").update(payload).eq("email", normalizedEmail);
+
+  if (error) {
+    throw new Error(`Failed to update user: ${error.message}`);
   }
 }

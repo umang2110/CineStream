@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Only Gmail addresses (@gmail.com) are allowed' }, { status: 400 });
     }
 
-    const existingUser = findUserByEmail(email);
+    const existingUser = await findUserByEmail(email);
     if (existingUser && existingUser.is_verified) {
       return NextResponse.json({ error: 'Account already exists and is verified' }, { status: 400 });
     }
@@ -29,9 +29,9 @@ export async function POST(request: Request) {
 
     if (existingUser) {
       // Overwrite unverified user
-      updateUser(email, { password_hash, verification_token, token_expiry });
+      await updateUser(email, { password_hash, verification_token, token_expiry });
     } else {
-      createUser({
+      await createUser({
         email: email.toLowerCase(),
         name: username,
         password_hash,

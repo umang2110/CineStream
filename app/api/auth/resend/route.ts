@@ -11,7 +11,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
-    const user = findUserByEmail(email);
+    const user = await findUserByEmail(email);
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     const verification_token = crypto.randomInt(100000, 999999).toString();
     const token_expiry = Date.now() + 15 * 60 * 1000; // 15 minutes
 
-    updateUser(email, { verification_token, token_expiry });
+    await updateUser(email, { verification_token, token_expiry });
 
     try {
       await sendVerificationEmail(email, verification_token);
